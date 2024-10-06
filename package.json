@@ -9,16 +9,29 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@ant-design/cssinjs": "^1.21.1",
+    "@google/generative-ai": "^0.21.0",
+    "@langchain/community": "^0.3.4",
+    "@langchain/core": "^0.3.7",
+    "@langchain/google-genai": "^0.1.0",
+    "antd": "^5.21.2",
+    "cheerio": "^1.0.0",
+    "highlight.js": "^11.10.0",
+    "langchain": "^0.3.2",
+    "marked": "^14.1.2",
+    "next": "14.2.14",
     "react": "^18",
     "react-dom": "^18",
-    "next": "14.2.14"
+    "react-markdown": "^9.0.1",
+    "youtube-transcript": "^1.2.1",
+    "youtube-transcript-api": "^1.1.2"
   },
   "devDependencies": {
-    "typescript": "^5",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "eslint": "^8",
-    "eslint-config-next": "14.2.14"
+    "eslint-config-next": "14.2.14",
+    "typescript": "^5"
   }
 }
