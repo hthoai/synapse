@@ -68,7 +68,12 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error("Error summarizing content:", error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message || "Failed to summarize content" },
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to summarize content",
+      },
       { status: 500 }
     );
   }

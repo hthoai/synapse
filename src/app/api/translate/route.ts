@@ -32,10 +32,15 @@ export async function POST(req: Request) {
     const result = await chain.call({ text: text });
 
     return NextResponse.json({ translatedText: result.text });
-} catch (error) {
+  } catch (error) {
     console.error("Error translating content:", error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to translate content" },
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to translate content",
+      },
       { status: 500 }
     );
   }
