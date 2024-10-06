@@ -107,8 +107,8 @@ const ContentSummarizer = () => {
 
   const styles = useStyles();
 
-  const handleInputTypeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputType(e.target.value);
+  const handleInputTypeChange = (value: string) => {
+    setInputType(value);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {

@@ -1,7 +1,6 @@
 import { CheerioWebBaseLoader } from "@langchain/community/document_loaders/web/cheerio";
 import { PromptTemplate } from "@langchain/core/prompts";
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
-import { LLMChain } from "langchain/chains";
 import { NextResponse } from "next/server";
 import { YoutubeTranscript } from "youtube-transcript";
 
@@ -60,11 +59,11 @@ export async function POST(req: Request) {
       {text}
     `;
     const prompt = PromptTemplate.fromTemplate(template);
-    const chain = new LLMChain({ llm: model, prompt });
+    const chain = prompt.pipe(model);
 
-    const result = await chain.call({ text: text });
+    const result = await chain.invoke({ text: text });
 
-    return NextResponse.json({ summary: result.text });
+    return NextResponse.json({ summary: result.content });
   } catch (error) {
     console.error("Error summarizing content:", error);
     return NextResponse.json(

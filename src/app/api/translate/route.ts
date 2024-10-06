@@ -1,6 +1,5 @@
 import { PromptTemplate } from "@langchain/core/prompts";
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
-import { LLMChain } from "langchain/chains";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
@@ -27,11 +26,11 @@ export async function POST(req: Request) {
       Provide only the translated text without any additional comments or explanations.
     `;
     const prompt = PromptTemplate.fromTemplate(template);
-    const chain = new LLMChain({ llm: model, prompt });
+    const chain = prompt.pipe(model);
 
-    const result = await chain.call({ text: text });
+    const result = await chain.invoke({ text: text });
 
-    return NextResponse.json({ translatedText: result.text });
+    return NextResponse.json({ translatedText: result.content });
   } catch (error) {
     console.error("Error translating content:", error);
     return NextResponse.json(
