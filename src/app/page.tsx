@@ -1,33 +1,37 @@
 "use client";
 
+import MarkdownToTypography from "@/components/MarkdownToTypography";
+import { LLM_CONFIG } from "@/config/llm-config";
 import {
   FileTextOutlined,
   LinkOutlined,
+  MenuOutlined,
   TranslationOutlined,
   YoutubeOutlined,
 } from "@ant-design/icons";
+import type { MenuProps } from "antd";
 import {
   Avatar,
   Button,
   Card,
+  Dropdown,
   Input,
   Layout,
   message,
   Radio,
   RadioChangeEvent,
-  Select,
   Space,
   Spin,
+  Tag,
   theme,
   Typography,
 } from "antd";
-import { marked } from "marked";
+
 import React, { useState } from "react";
 
 const { Header, Content } = Layout;
 const { Title } = Typography;
 const { TextArea } = Input;
-const { Option } = Select;
 
 const useStyles = () => {
   const { useToken } = theme;
@@ -97,6 +101,7 @@ const useStyles = () => {
 const ContentSummarizer = () => {
   const [inputType, setInputType] = useState("youtube");
   const [inputValue, setInputValue] = useState("");
+  const [selectedModel, setSelectedModel] = useState(LLM_CONFIG.defaultModel);
   const [summary, setSummary] = useState("");
   const [loading, setLoading] = useState(false);
   const [language, setLanguage] = useState("English");
@@ -104,11 +109,16 @@ const ContentSummarizer = () => {
   const [translating, setTranslating] = useState(false);
   const [targetTranslateLanguage, setTargetTranslateLanguage] =
     useState("Vietnamese");
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const styles = useStyles();
 
-  const handleInputTypeChange = (value: string) => {
-    setInputType(value);
+  const handleModelChange = (value: string) => {
+    setSelectedModel(value);
+  };
+
+  const handleInputTypeChange = (e: RadioChangeEvent) => {
+    setInputType(e.target.value);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -131,7 +141,12 @@ const ContentSummarizer = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ inputType, inputValue, language }),
+        body: JSON.stringify({
+          inputType,
+          inputValue,
+          language,
+          model: selectedModel,
+        }),
       });
 
       if (!response.ok) {
@@ -173,6 +188,34 @@ const ContentSummarizer = () => {
     }
   };
 
+  const menuItems: MenuProps["items"] = [
+    {
+      key: "model",
+      label: "Select Model",
+      children: LLM_CONFIG.models.map((model) => ({
+        key: model.name,
+        label: model.label,
+        onClick: () => handleModelChange(model.name),
+      })),
+    },
+    {
+      key: "language",
+      label: "Select Language",
+      children: ["English", "Vietnamese", "Japanese", "Chinese"].map(
+        (lang) => ({
+          key: lang,
+          label: lang,
+          onClick: () => handleLanguageChange(lang),
+        })
+      ),
+    },
+  ];
+
+  const getModelLabel = (modelName: string) => {
+    const model = LLM_CONFIG.models.find((m) => m.name === modelName);
+    return model ? model.label : modelName;
+  };
+
   return (
     <Layout style={styles.layout}>
       <Header style={styles.header}>
@@ -193,12 +236,24 @@ const ContentSummarizer = () => {
       </Header>
       <Content style={styles.mainContent}>
         <div style={styles.contentWrapper}>
-          <Card>
+          <Card
+            extra={
+              <Dropdown
+                menu={{ items: menuItems }}
+                trigger={["click"]}
+                placement="topLeft"
+              >
+                <Button icon={<MenuOutlined />}>Settings</Button>
+              </Dropdown>
+            }
+          >
+            <div style={{ marginBottom: "16px", textAlign: "center" }}>
+              <Tag color="blue">Model: {getModelLabel(selectedModel)}</Tag>
+              <Tag color="green">Language: {language}</Tag>
+            </div>
             <Space direction="vertical" size="large" style={{ width: "100%" }}>
               <Radio.Group
-                onChange={(e: RadioChangeEvent) =>
-                  handleInputTypeChange(e.target.value)
-                }
+                onChange={handleInputTypeChange}
                 value={inputType}
                 buttonStyle="solid"
                 style={{
@@ -236,28 +291,16 @@ const ContentSummarizer = () => {
                 }}
               />
               <div style={{ display: "flex", justifyContent: "center" }}>
-                <Space>
-                  <Select
-                    defaultValue="English"
-                    style={{ width: 120 }}
-                    onChange={handleLanguageChange}
-                  >
-                    <Option value="English">English</Option>
-                    <Option value="Vietnamese">Vietnamese</Option>
-                    <Option value="Japanese">Japanese</Option>
-                    <Option value="Chinese">Chinese</Option>
-                  </Select>
-                  <Button
-                    type="primary"
-                    onClick={handleSummarize}
-                    loading={loading}
-                    size="large"
-                    icon={<TranslationOutlined />}
-                    style={{ height: "32px" }}
-                  >
-                    Summarize
-                  </Button>
-                </Space>
+                <Button
+                  type="primary"
+                  onClick={handleSummarize}
+                  loading={loading}
+                  size="large"
+                  icon={<TranslationOutlined />}
+                  style={{ height: "32px" }}
+                >
+                  Summarize
+                </Button>
               </div>
             </Space>
           </Card>
@@ -266,10 +309,7 @@ const ContentSummarizer = () => {
             <>
               <Card title="Summary" style={{ marginTop: "24px" }}>
                 <Spin spinning={loading}>
-                  <div
-                    dangerouslySetInnerHTML={{ __html: marked(summary) }}
-                    style={{ fontSize: "18px", lineHeight: "1.6" }}
-                  />
+                  <MarkdownToTypography markdown={summary} />
                 </Spin>
               </Card>
               <Card title="Translation" style={{ marginTop: "24px" }}>
@@ -279,16 +319,6 @@ const ContentSummarizer = () => {
                   style={{ width: "100%" }}
                 >
                   <Space>
-                    <Select
-                      value={targetTranslateLanguage}
-                      style={{ width: 120 }}
-                      onChange={handleTargetTranslateLanguageChange}
-                    >
-                      <Option value="English">English</Option>
-                      <Option value="Vietnamese">Vietnamese</Option>
-                      <Option value="Japanese">Japanese</Option>
-                      <Option value="Chinese">Chinese</Option>
-                    </Select>
                     <Button
                       type="primary"
                       onClick={handleTranslate}
@@ -300,12 +330,7 @@ const ContentSummarizer = () => {
                   </Space>
                   {translatedSummary && (
                     <Spin spinning={translating}>
-                      <div
-                        dangerouslySetInnerHTML={{
-                          __html: marked(translatedSummary),
-                        }}
-                        style={{ fontSize: "18px", lineHeight: "1.6" }}
-                      />
+                      <MarkdownToTypography markdown={translatedSummary} />
                     </Spin>
                   )}
                 </Space>
