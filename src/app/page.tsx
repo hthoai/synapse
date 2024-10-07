@@ -232,7 +232,7 @@ const ContentSummarizer = () => {
       <Header style={styles.header}>
         <div style={styles.headerContent}>
           <Avatar
-            src="/synapse.png"
+            src="favicon.ico"
             shape="square"
             size={64}
             style={styles.logo}

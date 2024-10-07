@@ -1,9 +1,38 @@
 import { LLM_CONFIG } from "@/config/llm-config";
 import { CheerioWebBaseLoader } from "@langchain/community/document_loaders/web/cheerio";
+import { YoutubeLoader } from "@langchain/community/document_loaders/web/youtube";
 import { PromptTemplate } from "@langchain/core/prompts";
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { NextResponse } from "next/server";
-import { YoutubeTranscript } from "youtube-transcript";
+
+const LANGUAGES = [
+  "en",
+  "en-US",
+  "en-UK",
+  "en-GB",
+  "vi",
+  "ja",
+  "ko",
+  "zh-Hans",
+  "zh-Hant",
+];
+
+async function loadYoutubeTranscript(url: string) {
+  for (const language of LANGUAGES) {
+    try {
+      const loader = YoutubeLoader.createFromUrl(url, {
+        language: language,
+        addVideoInfo: false,
+      });
+      const docs = await loader.load();
+      return docs;
+    } catch {
+      // Continue to the next language if this one fails
+    }
+  }
+  // If all languages fail, throw an error
+  throw new Error("Failed to load transcript in any supported language");
+}
 
 export async function POST(req: Request) {
   const { inputType, inputValue, language, model } = await req.json();
@@ -13,12 +42,14 @@ export async function POST(req: Request) {
 
     if (inputType === "youtube") {
       try {
-        const transcript = await YoutubeTranscript.fetchTranscript(inputValue);
-        text = transcript.map((item) => item.text).join(" ");
+        const docs = await loadYoutubeTranscript(inputValue);
+        text = docs.map((doc) => doc.pageContent).join("\n");
       } catch (error) {
-        console.error("Error fetching YouTube transcript:", error);
         return NextResponse.json(
-          { error: "Failed to fetch YouTube transcript" },
+          {
+            error: "Failed to fetch YouTube transcript",
+            details: error instanceof Error ? error.message : String(error),
+          },
           { status: 400 }
         );
       }
@@ -28,9 +59,11 @@ export async function POST(req: Request) {
         const docs = await loader.load();
         text = docs.map((doc) => doc.pageContent).join("\n");
       } catch (error) {
-        console.error("Error loading article content:", error);
         return NextResponse.json(
-          { error: "Failed to load article content" },
+          {
+            error: "Failed to load article content",
+            details: error instanceof Error ? error.message : String(error),
+          },
           { status: 400 }
         );
       }
