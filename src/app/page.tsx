@@ -15,6 +15,7 @@ import {
   Button,
   Card,
   Dropdown,
+  FloatButton,
   Input,
   Layout,
   message,
@@ -354,6 +355,7 @@ const ContentSummarizer = () => {
           )}
         </div>
       </Content>
+      <FloatButton.BackTop />
     </Layout>
   );
 };
