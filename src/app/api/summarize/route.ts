@@ -66,9 +66,7 @@ export async function POST(req: Request) {
 
       ### 🔍 Main Concepts
       Break down all the core ideas discussed, ensure to thoroughly read and analyze all texts with great attention to detail, organized by theme or chronology as appropriate
-      #### Concept 1
-        With each point, please provide a detailed summary of the content, ensure that no information is missed.
-      #### Concept 2
+      #### Name of concept
         With each point, please provide a detailed summary of the content, ensure that no information is missed.
       ...
 

@@ -109,7 +109,6 @@ const ContentSummarizer = () => {
   const [translating, setTranslating] = useState(false);
   const [targetTranslateLanguage, setTargetTranslateLanguage] =
     useState("Vietnamese");
-  const [menuOpen, setMenuOpen] = useState(false);
 
   const styles = useStyles();
 
@@ -191,7 +190,7 @@ const ContentSummarizer = () => {
   const menuItems: MenuProps["items"] = [
     {
       key: "model",
-      label: "Select Model",
+      label: "Model",
       children: LLM_CONFIG.models.map((model) => ({
         key: model.name,
         label: model.label,
@@ -200,12 +199,23 @@ const ContentSummarizer = () => {
     },
     {
       key: "language",
-      label: "Select Language",
+      label: "Language",
       children: ["English", "Vietnamese", "Japanese", "Chinese"].map(
         (lang) => ({
           key: lang,
           label: lang,
           onClick: () => handleLanguageChange(lang),
+        })
+      ),
+    },
+    {
+      key: "targetTranslateLanguage",
+      label: "Translation Language",
+      children: ["Vietnamese", "English", "Japanese", "Chinese"].map(
+        (lang) => ({
+          key: `translate_${lang}`,
+          label: lang,
+          onClick: () => handleTargetTranslateLanguageChange(lang),
         })
       ),
     },
@@ -313,6 +323,11 @@ const ContentSummarizer = () => {
                 </Spin>
               </Card>
               <Card title="Translation" style={{ marginTop: "24px" }}>
+                <div style={{ marginBottom: "16px", textAlign: "left" }}>
+                  <Tag color="orange">
+                    Translation Language: {targetTranslateLanguage}
+                  </Tag>
+                </div>
                 <Space
                   direction="vertical"
                   size="large"
